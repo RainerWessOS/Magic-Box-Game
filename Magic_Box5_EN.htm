@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+   <meta charset="utf-8" />
+   <title>Magic Box Game</title>
+   <meta name="author" content="Rainer Wess" />
+   <meta name="description" content="Magic Box Game realised with JavaScript, HTML5 und CSS" />
+   <meta name="keywords" content="Spiel,Logik, Game, Logic, Puzzle,Touch,Handy App,mobile,open source,GPL, freeware, HTML,CSS, JavaScript" />
+
+   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+<style>
+
+
+/* 
+   I have reduced the margins-height     
+   of some elements to look nicer on    
+   the Sololearn mobile App. To play 
+   it standlone you may stretch it a 
+   little bit in Y-direction.
+*/
+
+
+body {
+   width: 360px;
+   margin: auto;
+   //color:white;
+   font-weight: bold;
+   background-color: darkgreen;
+   overflow: hidden;
+   
+   /* disabling content selection */
+   user-select: none; 
+   -moz-user-select: none; 
+   -khtml-user-select: none; 
+   -ms-user-select: none; 
+   -webkit-user-select: none;
+}
+
+a {
+    color:Gold;
+}
+
+#game {
+   margin: 20px;
+   overflow:hidden;
+}
+
+#header {
+   font-size: 32px;
+   color: red;
+   text-align: left;
+   text-shadow: -1px 0 white, 0 1px white, 1px 0 white, 0 -1px white;
+}
+
+.helpBtn {
+   font-size: 22px;
+   color:DeepSkyBlue;
+   font-weight: bold;
+   float: right;
+   width:35px;
+   height:35px;
+   border:1px solid;
+   border-color: white;
+   border-radius: 5px;
+   background-color: darkgreen;
+}
+
+#game_stats{
+   font-size: 20px;
+   color: white;
+   margin-top: 30px;
+}
+
+#info{
+   color:gold;
+   text-align: center;
+   margin-left: 35px;
+}
+
+#level{
+   float: left;
+   text-align: left;
+   margin-bottom: 30px;
+}
+
+#score{
+   float: right;
+   text-align: right;
+}
+
+.tables {
+   display: flex;
+   flex-direction: row;
+   justify-content: space-around;
+   width: 300px;
+   margin-top: 15px;
+   margin-left:auto;
+   margin-right:auto;
+   margin-bottom: 15px;
+}
+#b0{
+   border:5px;
+   border-color:red;
+   spacing:2px;
+}
+span {
+    vertical-align: middle;
+}
+
+.boxes {
+   height: 65px;
+   width: 65px;
+   font-size: 48px;
+   color:white;
+   text-align: center;
+   spacing:5px;
+    white-space: nowrap;
+   vertical-align: middle;
+   background-color:white;
+   border-radius: 5px;
+     -webkit-box-shadow: 3px 3px 3px #303030;
+   -moz-box-shadow: 3px 3px 3px #303030;
+   box-shadow: 3px 3px 3px #303030;
+}
+
+#controls {
+   display: flex;
+   flex-direction: row;
+   justify-content: space-between;
+   margin-top: 40px;
+   margin-bottom: 3px;
+   margin-right: 3px;
+}
+
+.btn {
+   font-size: 16px;
+   color: white;
+   font-weight: bold;
+   border-color: white;
+   border-radius: 5px;
+   -webkit-box-shadow: 3px 3px #303030;
+   -moz-box-shadow: 3px 3px #303030;
+   box-shadow: 3px 3px #303030;
+   height: 35px;
+}
+
+#newTryBtn {
+      background-color: green;
+}
+
+#hintBtn {
+      background-color: red;
+}
+
+#newGameBtn {
+      background-color: black;
+}
+
+.help_page {
+  z-index: 5;
+  position: absolute;
+  display:none;
+  top:0px;
+  left:0px;
+  height: 100%;
+  margin: 20px;
+  color: white;
+  background-color: darkgreen;
+}
+
+.help_header {
+   font-size: 20px;
+   margin-top: 30px;
+   margin-bottom: 10px;
+}
+
+.help_nav_btn {
+   font-size: 18px;
+   color: deepskyblue;
+   float: right;
+   width:25px;
+   height:25px;
+   border:1px solid;
+   border-color: white;
+   border-radius: 5px;
+   background-color: darkgreen;
+}
+
+
+</style>
+
+ <script>
+
+   /*
+     Magic Box Game (buggy preview)
+     Copyright Rainer Wess 2018
+     Made in Germany 🇩🇪
+     
+     Open Source / Freeware
+     Released under GNU GPL 3.0
+     You can download it from
+     github, search RainerWessOS
+   */
+   
+  
+
+   globals: {
+      
+      var debug = false;
+      
+      var score;
+      var level;
+      var num;
+      var num_boxes;
+      var magic_box;
+      var box = [];
+      var numbers =[];
+      var colors = [];
+      var images = [];
+      var hinweis = [];
+      var inv;
+      var ani = false;
+      var ready = false;
+      var win = false;
+
+   }
+   
+   numbers = [0,1,2,3,4,5,6,7,8,9,10,11];
+   
+   colors = ["Gold", "DarkOrange", "Green", "HotPink", "DeepSkyBlue", "Olive", "Salmon", "DarkOrchid", "SlateBlue", "OrangeRed", "DarkCyan", "SlateGray"];
+   
+   images = ["💚", "🚢", "🚕", "🎾", "🌽️", "🐍", "👑", "🌞", "🌴", "🐧", "🐤", "☔"];
+   names = ["heart", "ship", "car", "tennis", "corn", "snake","crown", "sun","tree", "pinguin", "bird", "rain"];
+   
+   
+function id(id) {
+   return document.getElementById(id);
+}
+
+function hideD(hid) {
+    id(hid).style.display = "none";
+}
+
+function showD(sid) {
+    id(sid).style.display = "block";
+}
+
+function hide(hid) {
+    id(hid).style.visibility = "hidden";
+}
+
+function moveHide(nr) {
+     num=nr;
+     setBgColor(num, "#999999");
+     setTimeout("hide(num);",1000);
+}
+
+function show(sid) {
+    id(sid).style.visibility = "visible";
+}
+
+function getVis(vid) {
+    return id(vid).style.visibility;
+}
+
+function setText(sid, txt) {
+   id(sid).innerHTML = txt;
+}
+
+function aniWin() {
+   ani = (ani) ? false : true;
+   if (ani) setColor("info", "darkgreen");
+   else setColor("info", "gold");
+}
+
+function setColor(sid, color) {
+   id(sid).style.color = color;
+}
+
+function setBgColor(sid, color) {
+   id(sid).style.backgroundColor = color;
+}
+
+function colorBox(num) {
+     setText(num, num);
+     setBgColor(num, colors[num]);
+}
+
+function imageBox(num) {
+     setBgColor(num, "white");
+     setText(num, images[num]);
+}
+
+function randNum(min, max) {
+   return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+   
+function init() {
+
+    level = 0;
+    score = 0;
+    num_boxes = 3;
+    
+    for (var i=0; i<12; i++) {
+       colorBox(i);
+      // imageBox(i);
+       show(i);
+    }
+
+}
+
+
+function hit(nr) {
+
+  if(ready) {
+  
+     hide(box[nr]);
+     
+     // setTimeout("moveHide(nr);",700);
+
+    
+    if(nr == magic_box) {
+       hide(magic_box);
+    // setTimeout("moveHide(nr);",700);
+
+    }
+    
+    checkWin();
+  }
+}
+
+function backToBeginning() {
+
+  id("newTryBtn").blur();
+    
+  for (var i=0; i<num_boxes; i++) {
+    show(i);
+  }
+}
+
+function hint() {
+    
+    id("hintBtn").blur();
+      
+    alert("A little hint to make it a little bit easier. \n\nThe magic box is Number "+magic_box);
+}
+
+function checkWin() {
+     
+  var win = true;
+     
+  for(var i=0; i<box.length; i++) {
+      
+    if(getVis(i) == "visible") {
+       win = false;
+       break;
+    }
+  }
+  if(win) {
+      score += num_boxes;
+      setText("info", "You Win!");
+      setText("score", "Score : "+score);
+      id("newTryBtn").disabled = true;
+      
+      inv = setInterval(aniWin,700);
+      id("newGameBtn").disabled = false;
+  }
+}
+
+function newGame() {
+
+  ready = false;
+  win = false;
+  
+  if(inv) clearInterval(inv);
+
+  if(level<32) {
+  
+  level++;
+  id("newGameBtn").blur(); 
+  setText("newGameBtn", "New Game");
+  id("newGameBtn").disabled = true;
+  id("newTryBtn").disabled = false;
+  setText("info", " ");
+  setText("level", "Level : "+level);
+  
+  num_boxes = 3+Math.round(level/3-0.33);
+  
+  magic_box =  randNum(0,num_boxes-1);
+  
+  if(debug) {
+     setText("info", "M-Box : "+magic_box);
+  }
+  
+  for (var i=0; i<12; i++) {
+    hide(i);
+  }
+  
+  box.length = num_boxes;
+
+  for (var i=0; i<num_boxes; i++) {
+    box[i] = i;
+    show(i);
+  }
+  box = shuffle(box);
+  box = selfCloseAvoidence(box)
+  box = loopAvoidence(box);
+  
+  ready = true;
+  
+  }
+  else showD("end");
+  
+}
+
+
+function shuffle(arr) {
+
+   
+  /*
+     Fisher-Yates Shuffling Algorithm
+  */
+   
+   var i, j, tmp; 
+
+   for(i=arr.length-1; i>0; i--) {
+    
+      j = Math.floor(Math.random() * (i + 1));
+      tmp = arr[i];
+      arr[i] = arr[j];
+      arr[j] = tmp;
+      
+   }
+   
+   if(debug) {
+      console.log("--------------");
+      console.log("After Shuffle:");
+      console.log(arr);
+   }
+   
+   
+   return arr;
+   
+}
+
+
+function selfCloseAvoidence(arr){
+     
+  /*
+    Make shure none of the boxes
+    closes itself. We want the boxes 
+    to buld a chain, a selfclosing 
+    box would be the end of the chain
+  */
+  
+  var i, j, k, tmp;
+
+for( k=0; k<3; k++) {
+  for( j=0; j<arr.length; j++) {
+   for( i=0; i<arr.length; i++) {
+      if(arr[i] == i || arr[i] == magic_box ) {
+          if(i < arr.length-1) {
+             tmp = arr.splice(i,1);
+             arr.push(tmp);
+          }
+          else {
+             tmp = arr.pop();
+             arr.unshift(tmp);
+          }
+       }
+    }
+   }
+   }
+   
+   if(debug) {
+     console.log("After selfCloseAvoidence:");
+     console.log(arr);
+   }
+   
+   return arr;
+    
+}
+   
+   
+function loopAvoidence(arr) {
+
+   /*
+      Detecting and destroying loops  
+      example GUI[0123] box[3210]
+   */
+   
+   var i, j, k, n, tmp;
+   
+   for( n=0; n<arr.length; n++) {
+for( k=0; k<arr.length; k++) {
+   for( i=0; i<arr.length; i++) {
+     for( j=0; j<arr.length; j++) {
+        if(arr[i] == i || arr[i] == j &&  arr[j] == i || arr[i] == j &&  arr[j] == k && arr[k] == i ) {
+           tmp = arr.splice(i,1);
+           arr.push(tmp);
+            
+        }
+     }
+    }
+   }
+   }
+   
+   if(debug) {
+     console.log("After loopAvoidence:");
+     console.log(arr);
+     hinweis = arr;
+   }
+   
+   return arr;
+}
+
+
+// END
+
+
+ </script>
+   
+</head>
+
+<body onload="init()">
+
+   <div id="game">
+      <div><span id="header">Magic Box Game</span><button class="helpBtn" onclick="showD('guide');hideD('about')">?</buttton></div>
+
+      <div id="game_stats">
+          
+        <span id="level">Level : 0</span> 
+        <span id="info"></span>     
+        <span id="score">Score : 0</span>
+      </div>
+
+      <div class="tables">
+         <div id="8" class="boxes" onclick="hit(8)"><span>8</span></div>
+         <div id="2" class="boxes" onclick="hit(2)"><span>2</span></div>
+         <div id="3" class="boxes" onclick="hit(3)"><span>3</span></div>
+         <div id="10" class="boxes" onclick="hit(10)"><span>10</span></div>
+      </div>
+      
+      <div class="tables">
+         <div id="6" class="boxes" onclick="hit(6)"><span>6</span></div>
+         <div id="0" class="boxes" onclick="hit(0)"><span>0</span></div>
+         <div id="1" class="boxes" onclick="hit(1)"><span>1</span></div>
+         <div id="7" class="boxes" onclick="hit(7)"></span>7</span></div>
+      </div>
+    
+      <div class="tables">
+         <div id="9" class="boxes" onclick="hit(9)"><span>9</span></div>
+        <div id="4" class="boxes" onclick="hit(4)"><span>4</span></div>
+        <div id="5" class="boxes" onclick="hit(5)"><span>5</span></div>
+        <div id="11" class="boxes" onclick="hit(11)"><span>11</span></div>
+    </div>
+  
+      <div id="controls">
+         <div>
+            <button id="newTryBtn" class="btn" onclick="backToBeginning()">New Try</button>
+         </div>
+         <div>
+            <button id="hintBtn" class="btn" onclick="hint()">Need Hint</button>
+         </div>
+         <div>
+            <button id="newGameBtn" class="btn" onclick="newGame()">START GAME</button>
+         </div>
+      </div>
+            <div id="end" class="help_page">
+                <div><span id="header">Magic Box Game</span><button class="helpBtn" onclick="showD('guide');hideD('about')">?</button></div>
+                <div class="help_header">
+     <span>Spielende</span><button class="help_nav_btn" onclick="hideD('end');showD('about')">i</button></div>Du hast alle Level durchgespielt, mehr gibts nicht.
+<p>
+
+<p>&nbsp;<p></div>
+
+      <div id="guide" class="help_page">
+                <div><span id="header">Magic Box Game</span><button class="helpBtn" onclick="hideD('guide');hideD('about')">X</button></div>
+                <div class="help_header">
+     <span>Instructions</span><button class="help_nav_btn" onclick="hideD('guide');showD('about')">i</button></div>Magic Box is a combination of logic game and memory. What is needed is a clear mind and a good memory. <P> The goal of the game is to win. 😀 <br> To reach this goal you have to make all boxes disappear. That sounds easier than it is. Here are the rules: <p> Every box you click on will make a box disappear. <P> There is a magic box that can not only make another box but also itself disappear. <P> To make all boxes disapear they have to be clicked in the correct order. Your task is now to find out this order by clicking on the boxes and worrying. If you click the boxes in the wrong order boxes are left and the game is not solvable, which is not a problem, because the "New try" button will take you back to the beginning of the game and then you can try again. <p> Have fun puzzle! <p> Note: The game is beta, sometimes levels are not solveable. That happens (rare in level 8) and then level 15,17,20. <p>&nbsp;<p></div>
+           <div id="about" class="help_page">
+                               <div><span id="header">Magic Box Game</span><button class="helpBtn" onclick="hideD('guide');hideD('about')">X</button></div>
+                <div class="help_header">
+     <span>About the Game</span><button class="help_nav_btn" onclick="hideD('about');showD('guide')"><</button></div>
+Game-Development / Programming:<br>
+©️ Rainer Wess - 2018<p>
+Made in Germany 🇩🇪<p>
+<p>
+This game is open source / freeware it has been released under the GNU GENERAL PUBLIC LICENSE 3.0 from the  Free Software Foundation.
+<p>
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+<p>
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+<p>
+You should have received a copy of the GNU General Public License
+along with this program. <p>
+If not, see <a href="http://www.gnu.org/licenses/">http://www.gnu.org/licenses/</a>&nbsp;<p>
+&nbsp;<p>
+</div>
+     
+   </div>
+   
+</body>
+
+</html>

@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+   <meta charset="utf-8" />
+   <title>Magic Box Game</title>
+   <meta name="author" content="Rainer Wess" />
+   <meta name="description" content="17 + 4 Spiel realisiert mit JavaScript, HTML5 und CSS" />
+   <meta name="keywords" content="Spiel,Kartenspiel,17+4,siebzehn und vier,Touch,Handy App,open source,GPL, freeware,HTML,CSS,JavaScript" />
+
+   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+ 
+ <style>
+ 	
+ 
+/* 
+   I have reduced the margins-height     
+   of some elements to look nicer on    
+   the Sololearn mobile App. To play 
+   it standlone you may stretch it a 
+   little bit in Y-direction.
+*/
+
+/*
+*{
+  margin: 0;
+  padding: 0;
+}
+*/
+
+body {
+   width: 360px;
+   margin: auto;
+   //color:white;
+   font-weight: bold;
+   background-color: darkgreen;
+   overflow: hidden;
+   
+   /* disabling content selection */
+   user-select: none; 
+   -moz-user-select: none; 
+   -khtml-user-select: none; 
+   -ms-user-select: none; 
+   -webkit-user-select: none;
+}
+
+#game {
+   margin: 20px;
+   overflow:hidden;
+}
+
+#header {
+   font-size: 32px;
+   color: red;
+   text-align: left;
+   text-shadow: -1px 0 white, 0 1px white, 1px 0 white, 0 -1px white;
+}
+
+.helpBtn {
+   font-size: 22px;
+   color:DeepSkyBlue;
+   font-weight: bold;
+   float: right;
+   width:35px;
+   height:35px;
+   border:1px solid;
+   border-color: white;
+   border-radius: 5px;
+   background-color: darkgreen;
+}
+
+#game_stats{
+   font-size: 20px;
+   color: white;
+   margin-top: 30px;
+}
+
+#info{
+   color:gold;
+   text-align: center;
+   margin-left: 35px;
+}
+
+#level{
+   float: left;
+   text-align: left;
+   margin-bottom: 30px;
+}
+
+#score{
+   float: right;
+   text-align: right;
+}
+
+.tables {
+   display: flex;
+   flex-direction: row;
+   justify-content: space-around;
+   width: 300px;
+   margin-top: 15px;
+   margin-left:auto;
+   margin-right:auto;
+   margin-bottom: 15px;
+}
+#b0{
+   border:5px;
+   border-color:red;
+   spacing:2px;
+}
+span {
+    vertical-align: middle;
+}
+
+.boxes {
+   height: 65px;
+   width: 65px;
+   font-size: 48px;
+   color:white;
+   text-align: center;
+   spacing:5px;
+    white-space: nowrap;
+   vertical-align: middle;
+   background-color:white;
+   border-radius: 5px;
+     -webkit-box-shadow: 3px 3px 3px #303030;
+   -moz-box-shadow: 3px 3px 3px #303030;
+   box-shadow: 3px 3px 3px #303030;
+}
+
+#controls {
+   display: flex;
+   flex-direction: row;
+   justify-content: space-between;
+   margin-top: 40px;
+   margin-bottom: 3px;
+   margin-right: 3px;
+}
+
+.btn {
+   font-size: 16px;
+   color: white;
+   font-weight: bold;
+   border-color: white;
+   border-radius: 5px;
+   -webkit-box-shadow: 3px 3px #303030;
+   -moz-box-shadow: 3px 3px #303030;
+   box-shadow: 3px 3px #303030;
+   height: 35px;
+}
+
+#newTryBtn {
+      background-color: green;
+}
+
+#hintBtn {
+      background-color: red;
+}
+
+#newGameBtn {
+      background-color: black;
+}
+
+/*
+.none {
+      display: none;
+}
+.show {
+      display: block;
+}
+*/
+
+.help_page {
+  z-index: 5;
+  position: absolute;
+  display:none;
+  top:0px;
+  left:0px;
+  height: 100%;
+  margin: 20px;
+  color: white;
+  background-color: darkgreen;
+}
+
+.help_header {
+   font-size: 20px;
+   margin-top: 30px;
+   margin-bottom: 10px;
+}
+
+.help_nav_btn {
+   font-size: 18px;
+   color: deepskyblue;
+   float: right;
+   width:25px;
+   height:25px;
+   border:1px solid;
+   border-color: white;
+   border-radius: 5px;
+   background-color: darkgreen;
+}
+
+
+ </style>
+ 
+ <script>
+ 	
+ 
+   /*
+     Magic Box Game
+     Copyright Rainer Wess 2018
+     Made in Germany 🇩🇪
+     
+     Open Source / Freeware
+     Released under GNU GPL 3.0
+     You can download it from
+     github, search RainerWessOS
+   */
+   
+  
+
+   globals: {
+
+      var score;
+      var level;
+      var num;
+      var num_boxes;
+      var magic_box;
+      var box = [];
+      var numbers =[];
+      var colors = [];
+      var images = [];
+      var hinweis = [];
+      var step = 0;
+      var inv;
+      var ani = false;
+      var ready = false;
+      var win = false;
+
+   }
+   
+   numbers = [0,1,2,3,4,5,6,7,8,9,10,11];
+   
+   colors = ["Gold", "DarkOrange", "Green", "HotPink", "DeepSkyBlue", "Olive", "Salmon", "DarkOrchid", "SlateBlue", "OrangeRed", "DarkCyan", "SlateGray"];
+   
+   images = ["💚", "🚢", "🚕", "🎾", "🌽️", "🐍", "👑", "🌞", "🌴", "🐧", "🐤", "☔"];
+   names = ["heart", "ship", "car", "tennis", "corn", "snake","crown", "sun","tree", "pinguin", "bird", "rain"];
+   
+   window.onload=init;
+   
+
+function id(id) {
+   return document.getElementById(id);
+}
+
+function hideD(hid) {
+    id(hid).style.display = "none";
+}
+
+function showD(sid) {
+    id(sid).style.display = "block";
+}
+
+function hide(hid) {
+    id(hid).style.visibility = "hidden";
+}
+
+function moveHide(nr) {
+     num=nr;
+     setBgColor(num, "green");
+     setTimeout("hide(num);",1000);
+}
+
+function show(sid) {
+    id(sid).style.visibility = "visible";
+}
+
+function getVis(vid) {
+    return id(vid).style.visibility;
+}
+
+function setText(sid, txt) {
+   id(sid).innerHTML = txt;
+}
+
+function aniWin() {
+   ani = (ani) ? false : true;
+   if (ani) setColor("info", "darkgreen");
+   else setColor("info", "gold");
+}
+
+function setColor(sid, color) {
+   id(sid).style.color = color;
+}
+
+function setBgColor(sid, color) {
+   id(sid).style.backgroundColor = color;
+}
+
+function colorBox(num) {
+     setText(num, num);
+     setBgColor(num, colors[num]);
+}
+
+function imageBox(num) {
+     setBgColor(num, "white");
+     setText(num, images[num]);
+}
+
+function randNum(min, max) {
+   return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+   
+function init() {
+
+    level = 0;
+    score = 0;
+    num_boxes = 3;
+    
+    for (var i=0; i<12; i++) {
+       colorBox(i);
+      // imageBox(i);
+       show(i);
+    }
+    
+    //colorBox();
+    //imageBox();
+
+   //setTimeout("moveHide(11)",4000);
+}
+
+
+function hit(nr) {
+
+  if(ready) {
+  
+    hide(box[nr]);
+    
+    if(nr == magic_box) {
+      hide(magic_box);
+    }
+    
+    checkWin();
+  }
+}
+
+function backToBeginning() {
+
+  id("newTryBtn").blur();
+    
+  for (var i=0; i<num_boxes; i++) {
+    show(i);
+  }
+}
+
+function hint() {
+    
+    id("hintBtn").blur();
+      
+    alert("Hier gibt es einen Hinweis um die Lösung des Rätsels zu erleichtern.\n\nDiese Funktion ist allerdings noch nicht implementiert.😁\n\nVielleicht hilft das weiter:\n\n"+hinweis);
+}
+
+function checkWin() {
+     
+  var win = true;
+     
+  for(var i=0; i<box.length; i++) {
+      
+    if(getVis(i) == "visible") {
+       win = false;
+       break;
+    }
+  }
+  if(win) {
+      score += num_boxes;
+      setText("info", "You Win!");
+      setText("score", "Score : "+score);
+      id("newTryBtn").disabled = true;
+      
+      inv = setInterval(aniWin,700);
+      id("newGameBtn").disabled = false;
+  }
+}
+
+function newGame() {
+
+  ready = false;
+  win = false;
+  
+  if(inv) clearInterval(inv);
+
+  if(level<32) {
+  
+  level++;
+  id("newGameBtn").blur(); 
+  setText("newGameBtn", "Neues Spiel");
+  id("newGameBtn").disabled = true;
+  id("newTryBtn").disabled = false;
+  setText("info", " ");
+  setText("level", "Level : "+level);
+  
+  num_boxes = 3+Math.round(level/3-0.33);
+  
+  magic_box =  randNum(0,num_boxes-1);
+   setText("info", "MagicBox "+magic_box);
+  
+  for (var i=0; i<12; i++) {
+    hide(i);
+  }
+  
+  box.length = num_boxes;
+
+  for (var i=0; i<num_boxes; i++) {
+    box[i] = i;
+    show(i);
+  }
+  box = shuffle(box);
+  
+  ready = true;
+  
+  }
+  else showD("end");
+  
+}
+
+function shuffleM(arr) {
+
+}
+
+function shuffleN(arr) {
+
+  console.log(arr);
+  step += 1;
+
+ //step += step % num_boxes-1;
+ 
+   for(var i=0; i<step; i++) {
+             tmp = arr.splice(0,1);
+             arr.push(tmp);
+   }
+   
+     if(arr[0] == 0) {
+          tmp = arr.shift();
+          arr.push(tmp);
+     }
+     
+    for( i=0; i<arr.length; i++) {
+     for(var j=0; j<arr.length; j++) {
+        if(arr[i] == i || arr[i] == j &&  arr[j] == i) {
+           tmp = arr.splice(i,1);
+           arr.push(tmp);
+            
+        }
+     }
+    }
+     
+    console.log(arr);
+    
+    return arr;
+}
+
+
+function shuffle(arr) {
+
+   var i, j, tmp; 
+   var arr1 =[];
+   
+   console.log("-----");
+
+   // Fisher-Yates Shuffling Algorithm
+
+   for(i=arr.length-1; i>0; i--) {
+    
+      j = Math.floor(Math.random() * (i + 1));
+      tmp = arr[i];
+      arr[i] = arr[j];
+      arr[j] = tmp;
+      
+   }
+   
+   console.log("After Shuffle:");
+   console.log(arr);
+    
+   //make shure the box doesn't close itself
+    
+  for( j=0; j<arr.length; j++) {
+   for( i=0; i<arr.length; i++) {
+      if(arr[i] == i || arr[i] == magic_box ) {
+          if(i < arr.length-1) {
+             tmp = arr.splice(i,1);
+             arr.push(tmp);
+          }
+          else {
+             tmp = arr.pop();
+             arr.unshift(tmp);
+          }
+      }
+    }
+   }
+   
+   // detecting loops  
+     console.log("Before Loop Detection:");
+     console.log(arr);
+   // prevent [1234] box[4321]
+   for(var l=0; l<arr.length; l++) {
+for(var k=0; k<arr.length; k++) {
+   for( i=0; i<arr.length; i++) {
+     for( j=0; j<arr.length; j++) {
+        if(arr[i] == i || arr[i] == j &&  arr[j] == i || arr[i] == j &&  arr[j] == k && arr[k] == i ) {
+           tmp = arr.splice(i,1);
+           arr.push(tmp);
+            
+        }
+     }
+    }
+   }
+   }
+   
+    console.log("After Loop Detection:");
+    console.log(arr);
+    
+    hinweis = arr;
+    
+    return arr;
+}
+
+
+// END
+
+ </script>
+   
+</head>
+
+<body>
+<!-- <body onload="init()"> -->
+
+   <div id="game">
+      <div><span id="header">Magic Box Game</span><button class="helpBtn" onclick="showD('guide');hideD('about')">?</buttton></div>
+
+      <div id="game_stats">
+          
+        <span id="level">Level : 0</span> 
+        <span id="info"></span>     
+        <span id="score">Score : 0</span>
+      </div>
+
+      <div class="tables">
+         <div id="8" class="boxes" onclick="hit(8)"><span>8</span></div>
+         <div id="2" class="boxes" onclick="hit(2)"><span>2</span></div>
+         <div id="3" class="boxes" onclick="hit(3)"><span>3</span></div>
+         <div id="10" class="boxes" onclick="hit(10)"><span>10</span></div>
+      </div>
+      
+      <div class="tables">
+         <div id="6" class="boxes" onclick="hit(6)"><span>6</span></div>
+         <div id="0" class="boxes" onclick="hit(0)"><span>0</span></div>
+         <div id="1" class="boxes" onclick="hit(1)"><span>1</span></div>
+         <div id="7" class="boxes" onclick="hit(7)"></span>7</span></div>
+      </div>
+    
+      <div class="tables">
+         <div id="9" class="boxes" onclick="hit(9)"><span>9</span></div>
+        <div id="4" class="boxes" onclick="hit(4)"><span>4</span></div>
+        <div id="5" class="boxes" onclick="hit(5)"><span>5</span></div>
+        <div id="11" class="boxes" onclick="hit(11)"><span>11</span></div>
+    </div>
+  
+      <div id="controls">
+         <div>
+            <button id="newTryBtn" class="btn" onclick="backToBeginning()">Neuer Versuch</button>
+         </div>
+         <div>
+            <button id="hintBtn" class="btn" onclick="hint()">Hinweis</button>
+         </div>
+         <div>
+            <button id="newGameBtn" class="btn" onclick="newGame()">Spiel starten</button>
+         </div>
+      </div>
+            <div id="end" class="help_page">
+                <div><span id="header">Magic Box Game</span><button class="helpBtn" onclick="showD('guide');hideD('about')">?</button></div>
+                <div class="help_header">
+     <span>Spielende</span><button class="help_nav_btn" onclick="hideD('end');showD('about')">i</button></div>Du hast alle Level durchgespielt, mehr gibts nicht.
+<p>
+
+<p>&nbsp;<p></div>
+
+      <div id="guide" class="help_page">
+                <div><span id="header">Magic Box Game</span><button class="helpBtn" onclick="hideD('guide');hideD('about')">X</button></div>
+                <div class="help_header">
+     <span>Anleitung</span><button class="help_nav_btn" onclick="hideD('guide');showD('about')">i</button></div>Magic Box ist eine Kombination aus Logik-Spiel und Memory. Gefragt sind also ein klarer Verstand und ein gutes Gedächnis.
+<p>
+Ziel des Spiels ist zu gewinnen. 😀<br>
+Um dieses Ziel zu erreichen mußt du alle Boxen verschwinden lassen. Das hört sich einfacher an als es ist. Hier sind die Regeln:<p>
+Jede Box auf die du klickst läßt eine  Box verschwinden.<p>
+Es gibt eine magische Box die kann nicht nur eine andere sondern auch sich selbst verschwinden lassen.<p>
+Nur wenn die Boxen in der richtigen Reihenfolge angeklickt werden verschwinden wirklich alle. Deine Aufgabe ist es nun diese Reihenfolge herauszufinden indem du auf die Boxen klickst und dir Gedanken machst. Wenn du die Boxen in der falschen Reihenfolge anklickst bleiben Boxen übrig und das Spiel ist nicht mehr lösbar, was aber kein Problem ist, denn über die Schaltfläche "Neuer Versuch" gelangst du zum Spielanfang zurück und kannst es dann nochmal versuchen. <p>Viel Spaß beim Rätseln!<p>Hinweis: Das Spiel ist noch Beta, in Leveln ab ca. 15..17 kann es vorkommen , das das Spiel nicht lösbar ist,weil die eine oder andere Box übrig bleibt.<p>&nbsp;<p></div>
+           <div id="about" class="help_page">
+                               <div><span id="header">Magic Box Game</span><button class="helpBtn" onclick="hideD('guide');hideD('about')">X</button></div>
+                <div class="help_header">
+     <span>Infos zum Spiel</span><button class="help_nav_btn" onclick="hideD('about');showD('guide')"><</button></div>
+&nbsp;<p>
+Spielentwicklung/Programmierung:<br>
+©️ Rainer Wess - 2018
+<p>
+Das Spiel ist Open Source / Freeware und wurde unter der GNU GPL 3.0 ver&ouml;ffentlicht.
+<p>
+Das heißt du kannst damit machen was du willst, es nutzen oder weitergeben, solange der Urheber und die Lizenz genannt sind.
+</div>
+     
+   </div>
+   
+</body>
+
+</html>
