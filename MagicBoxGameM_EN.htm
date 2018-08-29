@@ -193,7 +193,7 @@
   #menu {
     overflow: hidden;
   }
-  
+
   .redBtn {
     background-color: red;
   }
@@ -414,22 +414,18 @@ id("menu").className="hidden_page";
   
  }
  
- 
-function init() {
-	
-	 for (var i=0; i<12; i++) {
-        colorBox(i);
-       // imageBox(i);
-       show(i);
-    }
-}
- 
+
 function startGame() {
 
  ready = false; 
 
  showGame();
- init();         
+            
+ for (var i=0; i<12; i++) {
+    colorBox(i);
+ // imageBox(i);
+    show(i);
+ }
   
  level = id("level_selector").value;
  setText("level", level);
@@ -709,9 +705,9 @@ function startGame() {
 
 </head>
 
-<body onload="init()">
+<body>
 
-  <div id="menu" class="hidden_page">
+  <div id="menu" class="overlay_page">
     <div class="header"><span class="game_title">Magic Box Game</span><button id="mBtn" class="MenuBtn" onclick="showGame()">&#10005;</button></div>
     <hr>
     <div>
@@ -788,14 +784,14 @@ function startGame() {
                   You should have received a copy of the GNU General Public License along with this program.
                   <p>
                     If not, see <a href="http://www.gnu.org/licenses/">http://www.gnu.org/licenses/</a>
-                                         <p>
-                    You can download the latest version of this game from github.com:<br>
+                    <p>
+                       You can download the latest version of this game from github.com:<br>
 <a href="https://github.com/RainerWessOS/MagicBoxGame">https://github.com/RainerWessOS/MagicBoxGame</a>
                     <p>
     </div>
   </div>
 
-  <div id="game" class="game_page">
+  <div id="game" class="hidden_page">
     <div class="header"><span class="game_title">Magic Box Game</span><button class="MenuBtn" onclick="showMenu()">&#9776;</button>
     </div>
 

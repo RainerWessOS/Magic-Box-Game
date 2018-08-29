@@ -145,7 +145,7 @@
     font-weight: bold;
     color: white;
     text-align: center;
-    vertical-align: middle;
+    line-height:1.2;
     background-color: white;
     border-radius: 5px;
     border: 1px solid;
@@ -200,10 +200,6 @@
     overflow: hidden;
   }
   
-  #mBtn {
-      visibility:hidden;
-  }
-
   .redBtn {
     background-color: red;
   }
@@ -425,27 +421,20 @@ id("menu").className="hidden_page";
  }
  
  function init() {
-    
-     ready = false; 
-            
-     for (var i=0; i<12; i++) {
-          colorBox(i);
-      // imageBox(i);
-          show(i);
-     }
- }
- 
+	
+	 for (var i=0; i<12; i++) {
+        colorBox(i);
+       // imageBox(i);
+       show(i);
+    }
+}
+
 function startGame() {
 
  ready = false; 
 
  showGame();
-            
- for (var i=0; i<12; i++) {
-    colorBox(i);
- // imageBox(i);
-    show(i);
- }
+ init();
   
  level = id("level_selector").value;
  setText("level", level);
@@ -780,7 +769,7 @@ Magic Box ist eine Kombination aus Logikspiel und Memory. Was ben&ouml;tigt wird
               <p>
                 Um alle Boxen verschwinden zu lassen, m&uuml;ssen sie in der richtigen Reihenfolge angeklickt werden. Deine Aufgabe ist es nun, diese Reihenfolge durch Anklicken der Boxen herauszufinden. Wenn du die K&auml;stchen in der falschen Reihenfolge anklickst, bleiben einige K&auml;stchen &uuml;brig und das Spiel ist nicht l&ouml;sbar, was kein Problem ist, denn der "Neuer Versuch" -Knopf bringt dich zur&uuml;ck zum Anfang des Levels und dann kannst du es erneut versuchen.
                 <p> Viel Spaß beim Puzzeln!
-                  <p> Hinweis: Habe viel Zufall in das Spiel einprogrammiert. Jedes Mal, wenn du es spielst, sind die Level unterschiedlich. Unbegrenzt viele Level!
+                  <p> Hinweis: Ich habe viel Zufall in das Spiel einprogrammiert. Jedes Mal, wenn du es spielst, sind die Level unterschiedlich. Unbegrenzt viele Level!
                       <p>
     </div>
   </div>
@@ -806,7 +795,7 @@ Dieses Programm wird in der Hoffnung verbreitet, dass es n&uuml;tzlich sein wird
                     Falls nicht, schau hier: <br><a href="http://www.gnu.org/licenses/">http://www.gnu.org/licenses/</a>
          <p>
             Die aktuellste Version des Spiels kannst du von github.com herunterladen:<br>
-<a href="https://github.com/RainerWessOS/" target="_new">https://github.com/RainerWessOS/</a>
+<a href="https://github.com/RainerWessOS/MagicBoxGame" target="_new">https://github.com/RainerWessOS/MagicBoxGame</a>
             <p>
     </div>
   </div>
