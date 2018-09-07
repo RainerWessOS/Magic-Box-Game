@@ -7,18 +7,9 @@
   <meta name="author" content="Rainer Wess" />
   <meta name="description" content="Magic Box Game realised with JavaScript, HTML5 und CSS" />
   <meta name="keywords" content="Spiel,Logik, Game, Logic, Puzzle, Touch, Handy App, mobile, open source, GPL, freeware, HTML,CSS, JavaScript" />
-
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="viewport" content="width=device-width, initial-scale=1, minimal-ui">
  
 <style>
-
-  /* 
-   I have reduced the margins-height     
-   of some elements to look nicer on    
-   the Sololearn mobile App. To play 
-   it standlone you may stretch it a 
-   little bit in Y-direction.
-*/
 
   body {
     width: 360px;
@@ -30,16 +21,7 @@
     background-color: darkgreen;
 
     /* disabling content selection */
-    -webkit-user-select:none;
-
-    -khtml-user-select:none;
-
-    -moz-user-select:none;
-
-    -ms-user-select:none;
-
     user-select:none;
-
   }
 
   hr {
@@ -82,6 +64,7 @@
     font: 32px Arial;
     font-weight: bold;
     color: red;
+    line-height: 1.2;
     text-align: left;
     text-shadow: -1px 0 white, 0 1px white, 1px 0 white, 0 -1px white;
   }
@@ -145,7 +128,7 @@
     font-weight: bold;
     color: white;
     text-align: center;
-    line-height:1.2;
+    line-height: 1.4;
     background-color: white;
     border-radius: 5px;
     border: 1px solid;
@@ -214,6 +197,11 @@
      margin-top: 3px; 
      text-align:left;
   }
+  
+  #f1 {
+     margin-top: 20px; 
+     height:25px;
+  }
 
   #playBtn {
       margin-left: 10px; 
@@ -236,6 +224,21 @@
     margin-top: 30px;
     margin-bottom: 10px;
     height: 100%;
+  }
+  
+  input[type=radio] { 
+     -moz-appearance: None; 
+     -webkit-appearance: none; 
+      background: transparent; 
+      border: 1px solid white;
+      border-radius: 5px;
+      width: 25px;
+      height: 25px;
+      vertical-align: middle;
+  } 
+  
+  input[type=radio]:checked { 
+     background: Red; 
   }
 
   input[type=range] {
@@ -302,7 +305,7 @@
 <script>
 
   /*
-       Magic Box Game  V0.85
+       Magic Box Game  V0.86
        Copyright Rainer Wess 2018
        Made in Germany 🇩🇪
        
@@ -310,7 +313,16 @@
        Released under GNU GPL 3.0
        You can download it from
        github, search RainerWessOS
-     */
+       
+       New in version 0.86: 
+       added imageBox feature, selectable
+       in menu page
+       changed emoticons to HTML encoded
+       UTF-8 symbols, you may have a look at 
+       https://www.utf8icons.com/
+       a few litlle improvements and fixed
+       some translation errors
+   */
 
   globals: {
 
@@ -322,24 +334,20 @@
     var num_boxes;
     var magic_box = 0;
     var box = [];
-    var numbers = [];
-    var colors = [];
-    var images = [];
     var inv;
     var ani = false;
     var ready = false;
-  
+    var withImages=false;
+    
+            //used in function colorBox
+    var colors = ["Gold", "DarkOrange", "Green", "HotPink", "DeepSkyBlue", "Olive", "Salmon", "DarkOrchid", "SlateBlue", "OrangeRed", "DarkCyan", "SlateGray"];
+            //used in function imageBox
+    var images = ["&#128154;", "&#128674;", "&#128661;", "&#127934;", "&#127805;", "&#128013;", "&#128081;", "&#127774;", "&#127796;", "&#128039;", "&#128036;", "&#9748;"];
+            //used in function hint
+    var names = ["Heart", "Ship", "Taxi", "Tennis", "Maize", "Snake", "Crown", "Sun", "Palm tree", "Penguin", "Chick", "Umbrella"];
+ 
   }
-
-  // most of the following arrays  
-  // are for future additions
-
-  numbers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
-
-  colors = ["Gold", "DarkOrange", "Green", "HotPink", "DeepSkyBlue", "Olive", "Salmon", "DarkOrchid", "SlateBlue", "OrangeRed", "DarkCyan", "SlateGray"];
-
-  images = ["💚", "🚢", "🚕", "🎾", "🌽️", "🐍", "👑", "🌞", "🌴", "🐧", "🐤", "☔"];
-  names = ["heart", "ship", "car", "tennis", "corn", "snake", "crown", "sun", "tree", "pinguin", "bird", "rain"];
+  
   
   // useful little helper functions
 
@@ -393,7 +401,6 @@
   
   function showMenu() {
  id("menu").className="overlay_page";
- if(level > 0) show("mBtn");
  id("guide").className="hidden_page";
  id("about").className="hidden_page";
   }
@@ -411,20 +418,32 @@ id("menu").className="hidden_page";
  function showGame() {
   id("game").className="game_page";
   id("menu").className="hidden_page";
-  
  }
  
+ function disableButtons() {
+   id("newTryBtn").disabled=true;
+   id("hintBtn").disabled=true;
+}
+
+function enableButtons() {
+	id("newTryBtn").disabled = false;
+    id("hintBtn").disabled = false;
+}
  
-function init() {
+ function init() {
+   
+     disableButtons();
+   
+     withImages = id("withImages").checked ? true : false;
 	
 	 for (var i=0; i<12; i++) {
-        colorBox(i);
-       // imageBox(i);
-       show(i);
+		 withImages==true ?  imageBox(i) : colorBox(i);
+         show(i);
     }
 }
  
-function startGame() {
+ 
+function startSelectedGame() {
 
  ready = false; 
 
@@ -443,9 +462,9 @@ function startGame() {
   function backToBeginning() {
 
     id("newTryBtn").blur();
-
+    
     for (var i=0; i<num_boxes; i++) {
-      show(i);
+        show(i);
     }
   }
 
@@ -453,9 +472,12 @@ function startGame() {
   function hint() {
 
     id("hintBtn").blur();
-
-    alert("A little hint to make it a little bit easier. \n\nThe magic box is Number: " + magic_box );
-  }
+    
+    if(withImages) {
+        alert("A little hint to make it a little bit easier. \n\nThe magic box is the image: " + names[magic_box] );
+     }
+     else alert("A little hint to make it a little bit easier. \n\nThe magic box is Number: " + magic_box );
+ }
   
   
   function howManyBoxes() {
@@ -650,8 +672,8 @@ function startGame() {
       setColor("info", "gold");
       setText("info", "You Win!");
       setText("score", score);
-     id("newTryBtn").disabled=true;
-     id("newGameBtn").disabled=false;
+      disableButtons();
+      id("newGameBtn").disabled=false;
       inv = setInterval(aniWin, 700);
 
     }
@@ -669,14 +691,12 @@ function startGame() {
     level++;
     
     id("newGameBtn").blur();
- setText("newGameBtn", "Next Level");
+    setText("newGameBtn", "Next Level");
     id("newGameBtn").disabled = true;
-    id("newTryBtn").disabled = false;
+    enableButtons();
     setText("info", " ");
     setText("level", level);
-
-   
-
+    
     for (i = 0; i < 12; i++) {
       hide(i);
     }
@@ -736,8 +756,14 @@ function startGame() {
        <option>26</option>
        <option>31</option>
    </datalist>
-          <button id="playBtn" class="btn redBtn" onclick="startGame()">PLAY</button>
+          <button id="playBtn" class="btn redBtn" onclick="startSelectedGame()">PLAY</button>
       </div>
+    </div>
+    <div id="f1">
+      <form name="form1">
+      <input type="radio" name="wImg" checked> with Numbers &nbsp; 
+      <input type="radio"  name="wImg" id="withImages"> with Images<br>
+      </form>
     </div>
     <div class="menu_info">
       If you have never played this game before just click "PLAY" to start with Level 1.
@@ -803,30 +829,30 @@ function startGame() {
       <span class="level">Level :&nbsp;</span>
       <span class="level" id="level">0</span>
       <span id="info">&nbsp;</span>
-            <span class="score" id="score">0</span>
+      <span class="score" id="score">0</span>
       <span class="score">Score :&nbsp;</span>
 
     </div>
 
     <div class="tables">
-      <div id="8" class="boxes" onclick="hit(8)"><span>8</span></div>
-      <div id="2" class="boxes" onclick="hit(2)"><span>2</span></div>
-      <div id="3" class="boxes" onclick="hit(3)"><span>3</span></div>
-      <div id="10" class="boxes" onclick="hit(10)"><span>10</span></div>
+      <div id="8" class="boxes" onclick="hit(8)">8</div>
+      <div id="2" class="boxes" onclick="hit(2)">2</div>
+      <div id="3" class="boxes" onclick="hit(3)">3</div>
+      <div id="10" class="boxes" onclick="hit(10)">10</div>
     </div>
 
     <div class="tables">
-      <div id="6" class="boxes" onclick="hit(6)"><span>6</span></div>
-      <div id="0" class="boxes" onclick="hit(0)"><span>0</span></div>
-      <div id="1" class="boxes" onclick="hit(1)"><span>1</span></div>
-      <div id="7" class="boxes" onclick="hit(7)"><span>7</span></div>
+      <div id="6" class="boxes" onclick="hit(6)">6</div>
+      <div id="0" class="boxes" onclick="hit(0)">0</div>
+      <div id="1" class="boxes" onclick="hit(1)">1</div>
+      <div id="7" class="boxes" onclick="hit(7)">7</div>
     </div>
 
     <div class="tables">
-      <div id="9" class="boxes" onclick="hit(9)"><span>9</span></div>
-      <div id="4" class="boxes" onclick="hit(4)"><span>4</span></div>
-      <div id="5" class="boxes" onclick="hit(5)"><span>5</span></div>
-      <div id="11" class="boxes" onclick="hit(11)"><span>11</span></div>
+      <div id="9" class="boxes" onclick="hit(9)">9</div>
+      <div id="4" class="boxes" onclick="hit(4)">4</div>
+      <div id="5" class="boxes" onclick="hit(5)">5</div>
+      <div id="11" class="boxes" onclick="hit(11)">11</div>
     </div>
 
     <div id="controls">
